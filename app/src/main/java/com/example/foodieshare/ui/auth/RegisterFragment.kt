@@ -7,6 +7,14 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.foodieshare.R
 
+
+// Android Fragment for user registration
+// MVVM architecture
+// uses AuthViewModel
+// contains EditText for email and password
+// register button
+// calls viewModel.register()
+// after successful registration navigate to FeedFragment
 class RegisterFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

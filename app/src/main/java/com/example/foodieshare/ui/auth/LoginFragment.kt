@@ -7,6 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.foodieshare.R
 
+// Android Fragment for user login
+// MVVM architecture
+// uses AuthViewModel
+// contains EditText for email and password
+// contains Login button and Register navigation button
+// on successful login navigate to FeedFragment using Navigation component
+// uses LiveData observer for authentication state
 class LoginFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
