@@ -2,20 +2,20 @@
     <!-- Base application theme. -->
     <style name="Theme.FoodieShare" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/primary_orange</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <item name="colorPrimaryContainer">@color/primary_light_orange</item>
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/text</item>
+        <item name="colorPrimaryContainer">@color/primary</item>
         <item name="colorOnPrimaryContainer">@color/text_dark</item>
         <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/primary_dark_orange</item>
-        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/text</item>
         <item name="colorSecondaryContainer">@color/background_cream</item>
         <item name="colorOnSecondaryContainer">@color/text_dark</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/primary_orange</item>
+        <item name="android:statusBarColor">@color/primary</item>
         <!-- Background and surface colors -->
         <item name="android:windowBackground">@color/background_cream</item>
-        <item name="colorSurface">@color/surface_white</item>
+        <item name="colorSurface">@color/white</item>
         <item name="colorOnSurface">@color/text_dark</item>
     </style>
 

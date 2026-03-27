@@ -5,8 +5,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.foodieshare.data.repository.AuthRepository
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
+import android.content.Intent
 
 class AuthViewModel : ViewModel() {
     private val repository = AuthRepository()
@@ -21,9 +23,6 @@ class AuthViewModel : ViewModel() {
         _user.value = repository.getCurrentUser()
     }
 
-    /**
-     * Attempts to log in the user with the provided email and password.
-     */
     fun login(email: String, password: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
@@ -37,18 +36,29 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    /**
-     * Attempts to register a new user with the provided email and password.
-     */
     fun register(email: String, password: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             val result = repository.registerUser(email, password)
             if (result.isSuccess) {
+                android.util.Log.d("AUTH_VIEWMODEL", "Google login success")
                 _user.value = repository.getCurrentUser()
                 _authState.value = AuthState.Success
             } else {
                 _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Registration failed")
+            }
+        }
+    }
+
+    fun signInWithCredential(credential: AuthCredential) {
+        _authState.value = AuthState.Loading
+        viewModelScope.launch {
+            val result = repository.signInWithCredential(credential)
+            if (result.isSuccess) {
+                _user.value = repository.getCurrentUser()
+                _authState.value = AuthState.Success
+            } else {
+                _authState.value = AuthState.Error(result.exceptionOrNull()?.message ?: "Sign in failed")
             }
         }
     }

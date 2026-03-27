@@ -1,17 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- FoodieShare Palette -->
-    <color name="primary_orange">#FF8C00</color> <!-- Warm Orange -->
-    <color name="primary_dark_orange">#E67E22</color>
-    <color name="primary_light_orange">#FFB347</color>
+    <color name="primary">#FF6B6B</color> <!-- Warm Orange -->
+    <color name="secondary">#FFA94D</color>
+    <color name="background_cream">#FFF7F5</color> <!-- Light Cream -->
 
-    <color name="background_cream">#FFFDF5</color> <!-- Light Cream -->
-    <color name="surface_white">#FFFFFF</color>
-
+    <color name="text">#333333</color>
     <color name="text_dark">#2C3E50</color>
     <color name="text_muted">#7F8C8D</color>
 
-    <color name="accent_green">#27AE60</color> <!-- Fresh green for positive actions -->
+    <color name="accent">#51CF66</color>
     <color name="error_red">#E74C3C</color>
 
     <!-- Standard Colors -->

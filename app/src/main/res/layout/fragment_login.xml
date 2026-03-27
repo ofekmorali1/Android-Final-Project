@@ -6,9 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background_cream"
     android:fillViewport="true">
-<!-- add login with google button under the logo
-     the button will be with the ic_google icon
-     on the button wrote "Log in with Google"-->
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -16,9 +14,9 @@
 
         <ImageView
             android:id="@+id/logoImage"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_marginTop="48dp"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:layout_marginTop="24dp"
             android:src="@drawable/logo_foodieshare"
             android:contentDescription="@string/login_logo_description"
             app:layout_constraintEnd_toEndOf="parent"
@@ -28,29 +26,40 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGoogle"
             style="@style/Widget.Material3.Button.OutlinedButton"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="48dp"
+            android:layout_marginTop="4dp"
+            android:text="Log in with Google"
             android:textAllCaps="false"
+            android:textColor="@color/black"
             app:icon="@drawable/ic_google"
             app:iconGravity="textStart"
             app:iconPadding="12dp"
             app:iconTint="@null"
-            app:layout_constraintBottom_toTopOf="@id/logoImage"
+            app:layout_constraintTop_toBottomOf="@id/logoImage"
+            tools:layout_editor_absoluteX="32dp" />
+
+        <TextView
+            android:id="@+id/tvOr"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="OR"
+            android:textColor="@color/black"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/email" />
+            app:layout_constraintTop_toBottomOf="@id/btnGoogle" />
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/email"
             style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
+            android:layout_marginTop="16dp"
             android:hint="@string/email"
             app:boxStrokeColor="@color/primary"
             app:hintTextColor="@color/primary"
-            app:layout_constraintTop_toBottomOf="@id/btnGoogle">
+            app:layout_constraintTop_toBottomOf="@id/tvOr">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/etEmail"
