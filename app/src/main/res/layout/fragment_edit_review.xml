@@ -25,7 +25,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Write a Review"
+            android:text="Edit Review"
             android:textSize="24sp"
             android:textStyle="bold"
             app:layout_constraintStart_toStartOf="parent"
@@ -54,7 +54,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:enabled="false"
             android:hint="Restaurant Name"
             app:layout_constraintTop_toBottomOf="@id/tilCity">
 
@@ -128,10 +127,8 @@
             android:layout_height="200dp"
             android:layout_marginTop="16dp"
             android:scaleType="centerCrop"
-            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tilDescription"
-            tools:src="@tools:sample/backgrounds/scenic"
-            tools:visibility="visible" />
+            tools:src="@tools:sample/backgrounds/scenic" />
 
         <Button
             android:id="@+id/btnSelectImage"
@@ -139,7 +136,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Select Image"
+            android:text="Change Image"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/ivImagePreview" />
 
@@ -148,7 +145,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
-            android:text="Submit Review"
+            android:text="Update Review"
             app:layout_constraintTop_toBottomOf="@id/btnSelectImage" />
 
         <ProgressBar

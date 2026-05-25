@@ -18,15 +18,35 @@ class ReviewRepository {
 
     suspend fun createReview(review: Review, imageUri: Uri?): Result<Unit> {
         return try {
-            var finalReview = review
+            val documentRef = reviewsCollection.document()
+            val id = documentRef.id
+            var finalReview = review.copy(id = id)
+            
             if (imageUri != null) {
+                val fileName = UUID.randomUUID().toString()
+                val imageRef = storage.reference.child("review_images/$fileName")
+                imageRef.putFile(imageUri).await()
+                val downloadUrl = imageRef.downloadUrl.await().toString()
+                finalReview = finalReview.copy(imageUrl = downloadUrl)
+            }
+            documentRef.set(finalReview).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun updateReview(review: Review, imageUri: Uri?): Result<Unit> {
+        return try {
+            var finalReview = review
+            if (imageUri != null && !imageUri.toString().startsWith("http")) {
                 val fileName = UUID.randomUUID().toString()
                 val imageRef = storage.reference.child("review_images/$fileName")
                 imageRef.putFile(imageUri).await()
                 val downloadUrl = imageRef.downloadUrl.await().toString()
                 finalReview = review.copy(imageUrl = downloadUrl)
             }
-            reviewsCollection.add(finalReview).await()
+            reviewsCollection.document(review.id).set(finalReview).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
@@ -37,19 +57,15 @@ class ReviewRepository {
         val liveData = MutableLiveData<List<Review>>()
         reviewsCollection.orderBy("timestamp", Query.Direction.DESCENDING)
             .addSnapshotListener { snapshot, e ->
-                // חשיפת שגיאות אם יש
                 if (e != null) {
                     Log.e("ReviewRepository", "Listen failed.", e)
                     return@addSnapshotListener
                 }
 
-                // בדיקה שהנתונים באמת מגיעים
                 if (snapshot != null) {
                     val reviews = snapshot.toObjects(Review::class.java)
                     Log.d("ReviewRepository", "Fetched ${reviews.size} reviews from Firestore")
                     liveData.value = reviews
-                } else {
-                    Log.d("ReviewRepository", "Snapshot is null")
                 }
             }
         return liveData

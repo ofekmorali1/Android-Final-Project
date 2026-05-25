@@ -21,8 +21,10 @@ class ReviewViewModel(
 
     private val _reviewsLiveData = reviewRepository.getReviews()
     val reviewsLiveData: LiveData<List<Review>> = _reviewsLiveData
+    
     private val _cityRestrictionReady = MutableLiveData<Boolean>()
     val cityRestrictionReady: LiveData<Boolean> = _cityRestrictionReady
+    
     private val _citySuggestions = MutableLiveData<List<PlaceSuggestion>>()
     val citySuggestions: LiveData<List<PlaceSuggestion>> = _citySuggestions
 
@@ -45,6 +47,7 @@ class ReviewViewModel(
 
     private val _createReviewSuccess = MutableLiveData<Boolean>()
     val createReviewSuccess: LiveData<Boolean> = _createReviewSuccess
+
     fun createReview(review: Review, imageUri: Uri?) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -55,6 +58,20 @@ class ReviewViewModel(
                 _createReviewSuccess.value = true
             } else {
                 _error.value = result.exceptionOrNull()?.message ?: "Failed to upload review"
+            }
+        }
+    }
+
+    fun updateReview(review: Review, imageUri: Uri?) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            val result = reviewRepository.updateReview(review, imageUri)
+            _isLoading.value = false
+            if (result.isSuccess) {
+                _createReviewSuccess.value = true
+            } else {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to update review"
             }
         }
     }
@@ -82,10 +99,10 @@ class ReviewViewModel(
 
     fun onCitySelected(cityId: String) {
         viewModelScope.launch {
-            _isLoading.value = true // מציג אנימציית טעינה בזמן שמביאים את הגבולות
+            _isLoading.value = true
             val bounds = placesRepository.getCityBounds(cityId)
             _selectedCityRestriction.value = bounds
-            _cityRestrictionReady.value = true // מודיע ל-UI שהגבולות מוכנים!
+            _cityRestrictionReady.value = true
             _isLoading.value = false
         }
     }
@@ -94,7 +111,7 @@ class ReviewViewModel(
         _selectedCityRestriction.value = null
         _restaurantSuggestions.value = emptyList()
         _selectedPlace.value = null
-        _cityRestrictionReady.value = false // נועל בחזרה את שדה המסעדה
+        _cityRestrictionReady.value = false
     }
 
     fun searchRestaurants(query: String) {

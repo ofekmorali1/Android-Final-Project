@@ -41,6 +41,9 @@
         <action
             android:id="@+id/action_feedFragment_to_createPostFragment"
             app:destination="@id/createReviewFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_editReviewFragment"
+            app:destination="@id/editReviewFragment" />
     </fragment>
 
     <fragment
@@ -48,6 +51,16 @@
         android:name="com.example.foodieshare.ui.Review.CreateReviewFragment"
         android:label="Create Review"
         tools:layout="@layout/fragment_create_review" />
+
+    <fragment
+        android:id="@+id/editReviewFragment"
+        android:name="com.example.foodieshare.ui.Review.EditReviewFragment"
+        android:label="Edit Review"
+        tools:layout="@layout/fragment_edit_review">
+        <argument
+            android:name="reviewId"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/reviewDetailFragment"

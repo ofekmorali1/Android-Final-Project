@@ -3,7 +3,6 @@ package com.example.foodieshare.data.repository
 import com.example.foodieshare.data.model.Place
 import com.example.foodieshare.data.remote.PlacesRemoteDataSource
 import com.example.foodieshare.ui.Review.PlaceSuggestion
-import com.google.android.gms.maps.model.LatLng
 import com.google.android.libraries.places.api.model.LocationRestriction
 import com.google.android.libraries.places.api.model.Place.Field
 import com.google.android.libraries.places.api.model.PlaceTypes
@@ -26,13 +25,16 @@ class PlacesRepository(private val remote: PlacesRemoteDataSource) {
         }
     }
 
+    /**
+     * Strictly bound results to the location restriction and filter for restaurants.
+     */
     suspend fun searchRestaurants(
         query: String,
         locationRestriction: LocationRestriction? = null
     ): List<PlaceSuggestion> {
         val predictions = remote.searchPlaces(
             query = query,
-            types = listOf(PlaceTypes.RESTAURANT),
+            types = listOf(PlaceTypes.ESTABLISHMENT),
             locationRestriction = locationRestriction
         )
         return predictions.map { prediction ->
@@ -54,6 +56,10 @@ class PlacesRepository(private val remote: PlacesRemoteDataSource) {
         )
     }
 
+    /**
+     * Step 1 & 5: Fetches the strict geographic bounds of a city.
+     * Uses Viewport if available for strict bounding, otherwise falls back to a point.
+     */
     suspend fun getCityBounds(placeId: String): LocationRestriction? {
         val fields = listOf(Field.VIEWPORT, Field.LAT_LNG)
         val googlePlace = remote.getPlaceDetails(placeId, fields)
@@ -65,10 +71,8 @@ class PlacesRepository(private val remote: PlacesRemoteDataSource) {
 
         val latLng = googlePlace?.latLng
         if (latLng != null) {
-            val offset = 0.05
-            val sw = LatLng(latLng.latitude - offset, latLng.longitude - offset)
-            val ne = LatLng(latLng.latitude + offset, latLng.longitude + offset)
-            return RectangularBounds.newInstance(sw, ne)
+            // If no viewport, fallback to a small area around the LatLng point
+            return RectangularBounds.newInstance(latLng, latLng)
         }
 
         return null

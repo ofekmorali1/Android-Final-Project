@@ -7,78 +7,127 @@
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
     app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    app:cardElevation="4dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="12dp">
+        android:padding="16dp">
 
         <ImageView
             android:id="@+id/ivUserImage"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:src="@drawable/ic_user_placeholder"
             android:contentDescription="User profile"
+            android:src="@drawable/ic_user_placeholder"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:src="@tools:sample/avatars" />
 
         <TextView
             android:id="@+id/tvUserName"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@id/tvRestaurantName"
+            app:layout_constraintBottom_toTopOf="@id/tvTimestamp"
+            app:layout_constraintEnd_toStartOf="@id/ivEdit"
             app:layout_constraintStart_toEndOf="@id/ivUserImage"
             app:layout_constraintTop_toTopOf="@id/ivUserImage"
             tools:text="John Doe" />
 
         <TextView
-            android:id="@+id/tvRestaurantName"
-            android:layout_width="wrap_content"
+            android:id="@+id/tvTimestamp"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="@color/primary"
+            android:textColor="@android:color/darker_gray"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="@id/ivUserImage"
+            app:layout_constraintEnd_toEndOf="@id/tvUserName"
             app:layout_constraintStart_toStartOf="@id/tvUserName"
             app:layout_constraintTop_toBottomOf="@id/tvUserName"
+            tools:text="2 hours ago" />
+
+        <ImageView
+            android:id="@+id/ivEdit"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="Edit review"
+            android:padding="2dp"
+            android:src="@drawable/ic_edit"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <TextView
+            android:id="@+id/ivLocationIcon"
+            android:layout_width="18dp"
+            android:layout_height="18dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/ic_location"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivUserImage"
+            app:tint="?attr/colorPrimary" />
+
+        <TextView
+            android:id="@+id/tvRestaurantName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="@id/ivLocationIcon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/ivLocationIcon"
+            app:layout_constraintTop_toTopOf="@id/ivLocationIcon"
             tools:text="Pasta Mia" />
+
+        <TextView
+            android:id="@+id/tvAddress"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="14sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="@id/tvRestaurantName"
+            app:layout_constraintTop_toBottomOf="@id/tvRestaurantName"
+            tools:text="Tel Aviv, Israel" />
 
         <RatingBar
             android:id="@+id/ratingBar"
             style="?android:attr/ratingBarStyleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:isIndicator="true"
             android:numStars="5"
-            android:progressTint="@color/primary"
             android:stepSize="0.5"
-            app:layout_constraintBottom_toBottomOf="@id/ivUserImage"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/ivUserImage" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvAddress"
+            tools:rating="4.5" />
 
         <TextView
             android:id="@+id/tvDescription"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="3"
-            app:layout_constraintTop_toBottomOf="@id/ivUserImage"
+            app:layout_constraintTop_toBottomOf="@id/ratingBar"
             tools:text="The best pasta I've ever had in my life! Highly recommended." />
 
-        <com.google.android.material.imageview.ShapeableImageView
+        <ImageView
             android:id="@+id/ivReviewImage"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="12dp"
             android:scaleType="centerCrop"
-            android:contentDescription="Review Image"
+            android:visibility="gone"
             app:layout_constraintTop_toBottomOf="@id/tvDescription"
-            app:shapeAppearanceOverlay="@style/ShapeAppearance_Corner12"
-            tools:src="@tools:sample/backgrounds/scenic" />
+            tools:src="@tools:sample/backgrounds/scenic"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

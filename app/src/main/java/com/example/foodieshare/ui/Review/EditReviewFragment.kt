@@ -12,7 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
-import com.example.foodieshare.R
+import androidx.navigation.fragment.navArgs
 import com.example.foodieshare.data.model.Place
 import com.example.foodieshare.data.model.Review
 import com.example.foodieshare.data.remote.PlacesRemoteDataSource
@@ -20,16 +20,19 @@ import com.example.foodieshare.data.repository.AuthRepository
 import com.example.foodieshare.data.repository.PlacesRepository
 import com.example.foodieshare.data.repository.ReviewRepository
 import com.example.foodieshare.data.repository.UsersRepository
-import com.example.foodieshare.databinding.FragmentCreateReviewBinding
-import com.google.firebase.Timestamp
+import com.example.foodieshare.databinding.FragmentEditReviewBinding
+import com.squareup.picasso.Picasso
 
-class CreateReviewFragment : Fragment() {
+class EditReviewFragment : Fragment() {
 
-    private var _binding: FragmentCreateReviewBinding? = null
+    private var _binding: FragmentEditReviewBinding? = null
     private val binding get() = _binding!!
 
     private lateinit var viewModel: ReviewViewModel
+    private val args: EditReviewFragmentArgs by navArgs()
+    
     private var selectedImageUri: Uri? = null
+    private var originalReview: Review? = null
     private var selectedPlace: Place? = null
 
     private lateinit var cityAdapter: PlaceSuggestionAdapter
@@ -38,7 +41,6 @@ class CreateReviewFragment : Fragment() {
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             selectedImageUri = it
-            binding.ivImagePreview.visibility = View.VISIBLE
             binding.ivImagePreview.setImageURI(it)
         }
     }
@@ -47,7 +49,7 @@ class CreateReviewFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentCreateReviewBinding.inflate(inflater, container, false)
+        _binding = FragmentEditReviewBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -57,6 +59,14 @@ class CreateReviewFragment : Fragment() {
         setupViewModel()
         setupUI()
         observeViewModel()
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                handleBackPress()
+            }
+        })
+
+        viewModel.loadReviewById(args.reviewId)
     }
 
     private fun setupViewModel() {
@@ -69,9 +79,8 @@ class CreateReviewFragment : Fragment() {
     }
 
     private fun setupUI() {
-        // Back Button
         binding.btnBack.setOnClickListener {
-            findNavController().popBackStack()
+            handleBackPress()
         }
 
         cityAdapter = PlaceSuggestionAdapter(requireContext())
@@ -85,8 +94,8 @@ class CreateReviewFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (binding.autoCompleteCity.isPerformingCompletion) return
                 
+                // If user changes city, we reset restaurant
                 binding.autoCompleteRestaurant.setText("")
-                binding.tilRestaurantName.isEnabled = false
                 binding.etAddress.setText("")
                 viewModel.clearCityBias()
                 
@@ -100,14 +109,13 @@ class CreateReviewFragment : Fragment() {
         binding.autoCompleteCity.setOnItemClickListener { parent, _, position, _ ->
             val suggestion = parent.getItemAtPosition(position) as PlaceSuggestion
             viewModel.onCitySelected(suggestion.id)
+            binding.tilRestaurantName.isEnabled = true
         }
 
         binding.autoCompleteRestaurant.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (binding.autoCompleteRestaurant.isPerformingCompletion) return
-
-                binding.etAddress.setText("")
                 if (s != null && s.length > 2) {
                     viewModel.searchRestaurants(s.toString())
                 }
@@ -125,30 +133,26 @@ class CreateReviewFragment : Fragment() {
         }
 
         binding.btnSubmit.setOnClickListener {
-            validateAndSubmit()
+            updateReview()
         }
     }
 
     private fun observeViewModel() {
+        viewModel.reviewDetailLiveData.observe(viewLifecycleOwner) { detail ->
+            detail?.let {
+                originalReview = it.review
+                prefillFields(it.review)
+            }
+        }
+
         viewModel.citySuggestions.observe(viewLifecycleOwner) { suggestions ->
             cityAdapter.updateData(suggestions)
-            if (binding.autoCompleteCity.hasFocus() && suggestions.isNotEmpty()) {
-                binding.autoCompleteCity.showDropDown()
-            }
+            if (binding.autoCompleteCity.hasFocus()) binding.autoCompleteCity.showDropDown()
         }
 
         viewModel.restaurantSuggestions.observe(viewLifecycleOwner) { suggestions ->
             restaurantAdapter.updateData(suggestions)
-            if (binding.autoCompleteRestaurant.hasFocus() && suggestions.isNotEmpty()) {
-                binding.autoCompleteRestaurant.showDropDown()
-            }
-        }
-
-        viewModel.cityRestrictionReady.observe(viewLifecycleOwner) { ready ->
-            binding.tilRestaurantName.isEnabled = ready
-            if (ready) {
-                binding.autoCompleteRestaurant.requestFocus()
-            }
+            if (binding.autoCompleteRestaurant.hasFocus()) binding.autoCompleteRestaurant.showDropDown()
         }
 
         viewModel.selectedPlace.observe(viewLifecycleOwner) { place ->
@@ -159,7 +163,6 @@ class CreateReviewFragment : Fragment() {
         viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
             binding.btnSubmit.isEnabled = !isLoading
-            setInputsEnabled(!isLoading)
         }
 
         viewModel.error.observe(viewLifecycleOwner) { error ->
@@ -170,23 +173,30 @@ class CreateReviewFragment : Fragment() {
 
         viewModel.createReviewSuccess.observe(viewLifecycleOwner) { success ->
             if (success) {
-                Toast.makeText(context, "Review uploaded successfully!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Review updated successfully!", Toast.LENGTH_SHORT).show()
                 viewModel.resetCreateReviewSuccess()
                 findNavController().popBackStack()
             }
         }
     }
 
-    private fun setInputsEnabled(enabled: Boolean) {
-        binding.tilCity.isEnabled = enabled
-        binding.tilRestaurantName.isEnabled = enabled && binding.autoCompleteCity.text.isNotEmpty()
-        binding.tilAddress.isEnabled = enabled
-        binding.tilDescription.isEnabled = enabled
-        binding.ratingBar.isEnabled = enabled
-        binding.btnSelectImage.isEnabled = enabled
+    private fun prefillFields(review: Review) {
+        binding.autoCompleteCity.setText(review.city, false)
+        binding.autoCompleteRestaurant.setText(review.restaurantName, false)
+
+        binding.etAddress.setText(review.address)
+        binding.ratingBar.rating = review.rating
+        binding.etDescription.setText(review.description)
+
+        if (!review.imageUrl.isNullOrEmpty()) {
+            binding.ivImagePreview.visibility = View.VISIBLE
+            Picasso.get().load(review.imageUrl).into(binding.ivImagePreview)
+        }
+
+        binding.tilRestaurantName.isEnabled = true
     }
 
-    private fun validateAndSubmit() {
+    private fun updateReview() {
         val city = binding.autoCompleteCity.text.toString()
         val restaurantName = binding.autoCompleteRestaurant.text.toString()
         val address = binding.etAddress.text.toString()
@@ -194,39 +204,64 @@ class CreateReviewFragment : Fragment() {
         val description = binding.etDescription.text.toString()
 
         if (city.isEmpty()) {
-            binding.tilCity.error = "City is required"
+            binding.tilCity.error = "Required"
             return
         }
         binding.tilCity.error = null
 
         if (restaurantName.isEmpty()) {
-            binding.tilRestaurantName.error = "Restaurant name is required"
+            binding.tilRestaurantName.error = "Required"
             return
         }
         binding.tilRestaurantName.error = null
 
-        if (rating == 0f) {
-            Toast.makeText(context, "Please select a rating", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val currentUser = AuthRepository().getCurrentUser()
-        if (currentUser == null) {
-            Toast.makeText(context, "User not authenticated", Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val review = Review(
-            userId = currentUser.uid,
+        val updatedReview = originalReview?.copy(
             city = city,
             restaurantName = restaurantName,
             address = address,
             rating = rating,
-            description = description,
-            timestamp = Timestamp.now()
+            description = description
         )
 
-        viewModel.createReview(review, selectedImageUri)
+        updatedReview?.let {
+            viewModel.updateReview(it, selectedImageUri)
+        }
+    }
+
+    private fun hasUnsavedChanges(): Boolean {
+        if (originalReview == null) return false
+
+        val currentCity = binding.autoCompleteCity.text.toString()
+        val currentRestaurant = binding.autoCompleteRestaurant.text.toString()
+        val currentAddress = binding.etAddress.text.toString()
+        val currentRating = binding.ratingBar.rating
+        val currentDescription = binding.etDescription.text.toString()
+        val isImageChanged = selectedImageUri != null
+
+        return currentCity != originalReview?.city ||
+                currentRestaurant != originalReview?.restaurantName ||
+                currentAddress != originalReview?.address ||
+                currentRating != originalReview?.rating ||
+                currentDescription != originalReview?.description ||
+                isImageChanged
+    }
+
+    private fun handleBackPress() {
+        if (hasUnsavedChanges()) {
+            android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Unsaved Changes")
+                .setMessage("Do you want to save your changes before leaving?")
+                .setPositiveButton("Save") { _, _ ->
+                    updateReview()
+                }
+                .setNegativeButton("Discard") { _, _ ->
+                    findNavController().popBackStack()
+                }
+                .setNeutralButton("Cancel", null)
+                .show()
+        } else {
+            findNavController().popBackStack()
+        }
     }
 
     override fun onDestroyView() {

@@ -1,10 +1,13 @@
 package com.example.foodieshare.data.model
 
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.DocumentId
 
 data class Review(
+    @DocumentId
     val id: String = "",
     val userId: String = "",
+    val city: String = "",
     val restaurantId: String = "",
     val restaurantName: String = "",
     val address: String = "",
