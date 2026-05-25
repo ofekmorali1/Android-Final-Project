@@ -91,11 +91,19 @@ class LoginFragment : Fragment() {
                 )
                 val credential = result.credential
 
-                if (credential is GoogleIdTokenCredential) {
-                    val firebaseCredential = GoogleAuthProvider.getCredential(credential.idToken, null)
-                    viewModel.signInWithCredential(firebaseCredential)
+                Log.d("LoginFragment", "Credential Class: ${credential.javaClass.name}")
+                Log.d("LoginFragment", "Credential Type: ${credential.type}")
+
+                if (credential is androidx.credentials.CustomCredential) {
+                    if (credential.type == com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                        val googleIdTokenCredential = com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.createFrom(credential.data)
+                        val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
+                        viewModel.signInWithCredential(firebaseCredential)
+                    } else {
+                        Toast.makeText(context, "Unexpected Custom Type: ${credential.type}", Toast.LENGTH_LONG).show()
+                    }
                 } else {
-                    Log.e("LoginFragment", "Unexpected credential type")
+                    Toast.makeText(context, "Unexpected Class: ${credential.javaClass.simpleName}", Toast.LENGTH_LONG).show()
                 }
             } catch (e: GetCredentialException) {
                 Log.e("LoginFragment", "Google sign in failed", e)

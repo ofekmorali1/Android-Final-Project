@@ -5,13 +5,16 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.foodieshare.data.model.User
 import com.example.foodieshare.data.repository.AuthRepository
+import com.example.foodieshare.data.repository.UsersRepository
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
 class AuthViewModel : ViewModel() {
     private val repository = AuthRepository()
+    private val usersRepository = UsersRepository()
 
     private val _user = MutableLiveData<FirebaseUser?>()
     val user: LiveData<FirebaseUser?> = _user
@@ -36,12 +39,21 @@ class AuthViewModel : ViewModel() {
         }
     }
 
-    fun register(email: String, password: String) {
+    fun register(name: String, email: String, password: String) {
         _authState.value = AuthState.Loading
         viewModelScope.launch {
             val result = repository.registerUser(email, password)
             if (result.isSuccess) {
-                Log.d("AUTH_VIEWMODEL", "Google login success")
+                val firebaseUser = result.getOrNull()
+                if (firebaseUser != null) {
+                    val newUser = User(
+                        id = firebaseUser.uid,
+                        name = name,
+                        email = email,
+                        profileImageUrl = null
+                    )
+                    usersRepository.saveUser(newUser)
+                }
                 _user.value = repository.getCurrentUser()
                 _authState.value = AuthState.Success
             } else {
@@ -55,6 +67,20 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.signInWithCredential(credential)
             if (result.isSuccess) {
+                val firebaseUser = result.getOrNull()
+                if (firebaseUser != null) {
+                    // Check if user exists in Firestore, if not create
+                    val existingUser = usersRepository.getUserById(firebaseUser.uid)
+                    if (existingUser == null) {
+                        val newUser = User(
+                            id = firebaseUser.uid,
+                            name = firebaseUser.displayName ?: "New User",
+                            email = firebaseUser.email ?: "",
+                            profileImageUrl = firebaseUser.photoUrl?.toString()
+                        )
+                        usersRepository.saveUser(newUser)
+                    }
+                }
                 _user.value = repository.getCurrentUser()
                 _authState.value = AuthState.Success
             } else {

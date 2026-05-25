@@ -188,8 +188,12 @@ class EditReviewFragment : Fragment() {
         binding.ratingBar.rating = review.rating
         binding.etDescription.setText(review.description)
 
-        if (!review.imageUrl.isNullOrEmpty()) {
+        if (review.imageUrl.isNullOrEmpty()) {
+            binding.ivImagePreview.visibility = View.GONE
+            binding.btnSelectImage.text = "Select Image"
+        } else {
             binding.ivImagePreview.visibility = View.VISIBLE
+            binding.btnSelectImage.text = "Change Image"
             Picasso.get().load(review.imageUrl).into(binding.ivImagePreview)
         }
 

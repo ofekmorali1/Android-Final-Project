@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="icon_gray_default">#9E9E9E</color>
+    <color name="icon_red_pressed">#F44336</color>
+    <color name="icon_blue_pressed">#2196F3</color>
     <!-- FoodieShare Palette -->
     <color name="primary">#FF6B6B</color> <!-- Warm Orange -->
     <color name="secondary">#FFA94D</color>

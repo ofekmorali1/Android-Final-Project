@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -21,10 +22,13 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.launch
+import java.security.MessageDigest
+import java.util.UUID
 
 class RegisterFragment : Fragment() {
 
     private lateinit var viewModel: AuthViewModel
+    private lateinit var etFullName: TextInputEditText
     private lateinit var etEmail: TextInputEditText
     private lateinit var etPassword: TextInputEditText
     private lateinit var etConfirmPassword: TextInputEditText
@@ -40,6 +44,7 @@ class RegisterFragment : Fragment() {
 
         viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
 
+        etFullName = view.findViewById(R.id.etFullName)
         etEmail = view.findViewById(R.id.etEmail)
         etPassword = view.findViewById(R.id.etPassword)
         etConfirmPassword = view.findViewById(R.id.etConfirmPassword)
@@ -48,11 +53,12 @@ class RegisterFragment : Fragment() {
         progressBar = view.findViewById(R.id.progressBar)
 
         btnRegister.setOnClickListener {
+            val name = etFullName.text.toString().trim()
             val email = etEmail.text.toString().trim()
             val password = etPassword.text.toString().trim()
             val confirmPassword = etConfirmPassword.text.toString().trim()
 
-            if (email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
                 Toast.makeText(context, "Please fill all fields", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
@@ -67,7 +73,7 @@ class RegisterFragment : Fragment() {
                 return@setOnClickListener
             }
 
-            viewModel.register(email, password)
+            viewModel.register(name, email, password)
         }
 
         btnLoginBack.setOnClickListener {
@@ -86,10 +92,18 @@ class RegisterFragment : Fragment() {
     private fun signInWithGoogle() {
         val credentialManager = CredentialManager.create(requireContext())
 
+        // Generate a nonce for security
+        val rawNonce = UUID.randomUUID().toString()
+        val bytes = rawNonce.toByteArray()
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        val hashedNonce = digest.fold("") { str, it -> str + "%02x".format(it) }
+
         val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(getString(R.string.default_web_client_id))
-            .setAutoSelectEnabled(true)
+            .setAutoSelectEnabled(false)
+            .setNonce(hashedNonce)
             .build()
 
         val request: GetCredentialRequest = GetCredentialRequest.Builder()
@@ -99,7 +113,7 @@ class RegisterFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 val result = credentialManager.getCredential(
-                    context = requireContext(),
+                    context = requireActivity(),
                     request = request
                 )
                 val credential = result.credential
@@ -110,6 +124,9 @@ class RegisterFragment : Fragment() {
                 } else {
                     Log.e("RegisterFragment", "Unexpected credential type")
                 }
+            } catch (e: NoCredentialException) {
+                Log.e("RegisterFragment", "No credentials available. Check SHA-1 and Package Name in Firebase.", e)
+                Toast.makeText(context, "No Google accounts available on this device.", Toast.LENGTH_LONG).show()
             } catch (e: GetCredentialException) {
                 Log.e("RegisterFragment", "Google sign in failed", e)
                 Toast.makeText(context, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()

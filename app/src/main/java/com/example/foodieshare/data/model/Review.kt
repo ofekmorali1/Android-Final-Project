@@ -7,6 +7,8 @@ data class Review(
     @DocumentId
     val id: String = "",
     val userId: String = "",
+    val authorName: String = "",
+    val authorImageUrl: String = "",
     val city: String = "",
     val restaurantId: String = "",
     val restaurantName: String = "",

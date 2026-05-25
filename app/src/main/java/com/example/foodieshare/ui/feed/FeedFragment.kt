@@ -1,9 +1,11 @@
 package com.example.foodieshare.ui.feed
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -51,15 +53,24 @@ class FeedFragment : Fragment() {
     private fun setupRecyclerView() {
         adapter = FeedAdapter(
             onReviewClick = { review ->
-                val action = FeedFragmentDirections.actionFeedFragmentToReviewDetailFragment(review.id)
-                findNavController().navigate(action)
             },
             onEditClick = { review ->
-                val action = FeedFragmentDirections.actionFeedFragmentToEditReviewFragment(review.id)
+                val action = FeedFragmentDirections.actionGlobalEditReviewFragment(review.id)
                 findNavController().navigate(action)
+            },
+            onDeleteClick = { review ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Delete Review")
+                    .setMessage("Are you sure you want to permanently delete this review?")
+                    .setPositiveButton("Delete") { _, _ ->
+                        viewModel.deleteReview(review.id)
+                    }
+                    .setNegativeButton("Cancel", null)
+                    .show()
             }
         )
-        binding.rvReviews.adapter = adapter
+
+        binding.rvFeed.adapter = adapter
     }
 
     private fun observeViewModel() {
@@ -67,8 +78,10 @@ class FeedFragment : Fragment() {
             adapter.submitList(reviews)
         }
 
-        viewModel.isLoading.observe(viewLifecycleOwner) { isLoading ->
-            binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
+        viewModel.error.observe(viewLifecycleOwner) { error ->
+            error?.let {
+                Toast.makeText(context, it, Toast.LENGTH_LONG).show()
+            }
         }
     }
 

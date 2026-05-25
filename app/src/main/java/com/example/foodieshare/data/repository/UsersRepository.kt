@@ -1,11 +1,15 @@
 package com.example.foodieshare.data.repository
 
+import android.net.Uri
 import com.example.foodieshare.data.model.User
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.storage.FirebaseStorage
 import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
 class UsersRepository {
     private val firestore = FirebaseFirestore.getInstance()
+    private val storage = FirebaseStorage.getInstance()
     private val usersCollection = firestore.collection("users")
 
     suspend fun getUserById(userId: String): User? {
@@ -23,5 +27,12 @@ class UsersRepository {
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    suspend fun uploadProfileImage(userId: String, imageUri: Uri): String {
+        val fileName = "profile_images/$userId/${UUID.randomUUID()}"
+        val ref = storage.reference.child(fileName)
+        ref.putFile(imageUri).await()
+        return ref.downloadUrl.await().toString()
     }
 }

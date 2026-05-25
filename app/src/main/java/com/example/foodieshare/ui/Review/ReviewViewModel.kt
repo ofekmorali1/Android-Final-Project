@@ -76,6 +76,17 @@ class ReviewViewModel(
         }
     }
 
+    fun deleteReview(reviewId: String) {
+        viewModelScope.launch {
+            _isLoading.value = true
+            val result = reviewRepository.deleteReview(reviewId)
+            _isLoading.value = false
+            if (result.isFailure) {
+                _error.value = result.exceptionOrNull()?.message ?: "Failed to delete review"
+            }
+        }
+    }
+
     fun loadReviewById(reviewId: String) {
         viewModelScope.launch {
             _isLoading.value = true

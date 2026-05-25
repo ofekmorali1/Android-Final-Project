@@ -18,9 +18,16 @@ class ReviewRepository {
 
     suspend fun createReview(review: Review, imageUri: Uri?): Result<Unit> {
         return try {
+            val userDoc = firestore.collection("users").document(review.userId).get().await()
+            val authorName = userDoc.getString("name") ?: "Unknown User"
+            val authorImageUrl = userDoc.getString("profileImageUrl") ?: ""
             val documentRef = reviewsCollection.document()
             val id = documentRef.id
-            var finalReview = review.copy(id = id)
+            var finalReview = review.copy(
+                id = id,
+                authorName = authorName,
+                authorImageUrl = authorImageUrl
+            )
             
             if (imageUri != null) {
                 val fileName = UUID.randomUUID().toString()
@@ -44,12 +51,27 @@ class ReviewRepository {
                 val imageRef = storage.reference.child("review_images/$fileName")
                 imageRef.putFile(imageUri).await()
                 val downloadUrl = imageRef.downloadUrl.await().toString()
-                finalReview = review.copy(imageUrl = downloadUrl)
+                finalReview = finalReview.copy(imageUrl = downloadUrl)
             }
             reviewsCollection.document(review.id).set(finalReview).await()
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    suspend fun updateAllUserReviews(userId: String, newName: String, newImageUrl: String) {
+        try {
+            val querySnapshot = reviewsCollection.whereEqualTo("userId", userId).get().await()
+            val batch = firestore.batch()
+
+            for (document in querySnapshot.documents) {
+                batch.update(document.reference, "authorName", newName)
+                batch.update(document.reference, "authorImageUrl", newImageUrl)
+            }
+            batch.commit().await()
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }
 
@@ -64,7 +86,25 @@ class ReviewRepository {
 
                 if (snapshot != null) {
                     val reviews = snapshot.toObjects(Review::class.java)
-                    Log.d("ReviewRepository", "Fetched ${reviews.size} reviews from Firestore")
+                    liveData.value = reviews
+                }
+            }
+        return liveData
+    }
+
+    fun getReviewsByUserId(userId: String): LiveData<List<Review>> {
+        val liveData = MutableLiveData<List<Review>>()
+        reviewsCollection
+            .whereEqualTo("userId", userId)
+            .orderBy("timestamp", Query.Direction.DESCENDING)
+            .addSnapshotListener { snapshot, e ->
+                if (e != null) {
+                    Log.e("ReviewRepository", "Listen failed.", e)
+                    return@addSnapshotListener
+                }
+
+                if (snapshot != null) {
+                    val reviews = snapshot.toObjects(Review::class.java)
                     liveData.value = reviews
                 }
             }
@@ -76,6 +116,22 @@ class ReviewRepository {
             reviewsCollection.document(reviewId).get().await().toObject(Review::class.java)
         } catch (e: Exception) {
             null
+        }
+    }
+
+    suspend fun fetchReviewsByUserId(userId: String): List<Review> {
+        return try {
+            val snapshot = reviewsCollection
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            val reviewsList = snapshot.toObjects(Review::class.java)
+            reviewsList.sortedByDescending { it.timestamp }
+
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
         }
     }
 
