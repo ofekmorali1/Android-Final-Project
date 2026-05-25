@@ -1,5 +1,6 @@
-package com.example.foodieshare.viewmodel
+package com.example.foodieshare.ui.auth
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -8,7 +9,6 @@ import com.example.foodieshare.data.repository.AuthRepository
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
-import android.content.Intent
 
 class AuthViewModel : ViewModel() {
     private val repository = AuthRepository()
@@ -41,7 +41,7 @@ class AuthViewModel : ViewModel() {
         viewModelScope.launch {
             val result = repository.registerUser(email, password)
             if (result.isSuccess) {
-                android.util.Log.d("AUTH_VIEWMODEL", "Google login success")
+                Log.d("AUTH_VIEWMODEL", "Google login success")
                 _user.value = repository.getCurrentUser()
                 _authState.value = AuthState.Success
             } else {

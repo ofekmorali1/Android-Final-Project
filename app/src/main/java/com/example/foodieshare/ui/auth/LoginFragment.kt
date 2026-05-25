@@ -1,26 +1,27 @@
 package com.example.foodieshare.ui.auth
 
-import android.app.Activity
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.credentials.CredentialManager
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialException
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.foodieshare.R
-import com.example.foodieshare.viewmodel.AuthViewModel
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.GoogleAuthProvider
-import com.google.android.material.button.MaterialButton
+import kotlinx.coroutines.launch
 
 class LoginFragment : Fragment() {
 
@@ -30,22 +31,6 @@ class LoginFragment : Fragment() {
     private lateinit var btnLogin: Button
     private lateinit var btnRegister: Button
     private lateinit var progressBar: ProgressBar
-    private lateinit var googleSignInClient: GoogleSignInClient
-
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)!!
-                val credential = GoogleAuthProvider.getCredential(account.idToken, null)
-                viewModel.signInWithCredential(credential)
-            } catch (e: ApiException) {
-                Toast.makeText(context, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
-    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -54,13 +39,6 @@ class LoginFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_login, container, false)
 
         viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
-
-        // Configure Google Sign-In
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(getString(R.string.default_web_client_id))
-            .requestEmail()
-            .build()
-        googleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
 
         etEmail = view.findViewById(R.id.etEmail)
         etPassword = view.findViewById(R.id.etPassword)
@@ -84,13 +62,46 @@ class LoginFragment : Fragment() {
         }
 
         view.findViewById<MaterialButton>(R.id.btnGoogle)?.setOnClickListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
+            signInWithGoogle()
         }
 
         observeViewModel()
 
         return view
+    }
+
+    private fun signInWithGoogle() {
+        val credentialManager = CredentialManager.create(requireContext())
+
+        val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
+            .setFilterByAuthorizedAccounts(false)
+            .setServerClientId(getString(R.string.default_web_client_id))
+            .setAutoSelectEnabled(true)
+            .build()
+
+        val request: GetCredentialRequest = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
+
+        lifecycleScope.launch {
+            try {
+                val result = credentialManager.getCredential(
+                    context = requireContext(),
+                    request = request
+                )
+                val credential = result.credential
+
+                if (credential is GoogleIdTokenCredential) {
+                    val firebaseCredential = GoogleAuthProvider.getCredential(credential.idToken, null)
+                    viewModel.signInWithCredential(firebaseCredential)
+                } else {
+                    Log.e("LoginFragment", "Unexpected credential type")
+                }
+            } catch (e: GetCredentialException) {
+                Log.e("LoginFragment", "Google sign in failed", e)
+                Toast.makeText(context, "Google sign in failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private fun observeViewModel() {
@@ -102,7 +113,7 @@ class LoginFragment : Fragment() {
                 }
                 is AuthViewModel.AuthState.Success -> {
                     progressBar.visibility = View.GONE
-                    android.util.Log.d("AUTH_STATE", "Success reached")
+                    Log.d("AUTH_STATE", "Success reached")
                     findNavController().navigate(R.id.action_loginFragment_to_feedFragment)
                 }
                 is AuthViewModel.AuthState.Error -> {

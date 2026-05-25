@@ -34,13 +34,30 @@
         android:id="@+id/feedFragment"
         android:name="com.example.foodieshare.ui.feed.FeedFragment"
         android:label="Feed"
-        tools:layout="@layout/fragment_feed" />
+        tools:layout="@layout/fragment_feed">
+        <action
+            android:id="@+id/action_feedFragment_to_reviewDetailFragment"
+            app:destination="@id/reviewDetailFragment" />
+        <action
+            android:id="@+id/action_feedFragment_to_createPostFragment"
+            app:destination="@id/createReviewFragment" />
+    </fragment>
 
     <fragment
-        android:id="@+id/createPostFragment"
-        android:name="com.example.foodieshare.ui.post.CreatePostFragment"
-        android:label="Create Post"
-        tools:layout="@layout/fragment_create_post" />
+        android:id="@+id/createReviewFragment"
+        android:name="com.example.foodieshare.ui.Review.CreateReviewFragment"
+        android:label="Create Review"
+        tools:layout="@layout/fragment_create_review" />
+
+    <fragment
+        android:id="@+id/reviewDetailFragment"
+        android:name="com.example.foodieshare.ui.Review.ReviewDetailFragment"
+        android:label="Review Detail"
+        tools:layout="@layout/fragment_review_detail">
+        <argument
+            android:name="reviewId"
+            app:argType="string" />
+    </fragment>
 
     <fragment
         android:id="@+id/profileFragment"
@@ -50,8 +67,8 @@
 
     <fragment
         android:id="@+id/myPostsFragment"
-        android:name="com.example.foodieshare.ui.profile.MyPostsFragment"
+        android:name="com.example.foodieshare.ui.profile.MyReviewsFragment"
         android:label="My Posts"
-        tools:layout="@layout/fragment_my_posts" />
+        tools:layout="@layout/fragment_my_reviews" />
 
 </navigation>

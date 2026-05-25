@@ -9,4 +9,21 @@
     <string name="or">OR</string>
     <!-- Replace with your actual web client ID from Firebase console -->
     <string name="default_web_client_id">917684820544-a6bk12gv1tnlijk2ude7li5o500nk8ik.apps.googleusercontent.com</string>
+
+    <!-- Google Maps / Places API key -->
+    <string name="google_maps_key">AIzaSyA28nLFZN3v8lTOk2fhPO4wqm0tDRtjgRE</string>
+
+    <!-- Create Review -->
+    <string name="share_your_experience">Share your experience</string>
+    <string name="restaurant_name">Restaurant Name</string>
+    <string name="address">Address</string>
+    <string name="change_image">Change Image</string>
+    <string name="rating">Rating</string>
+    <string name="your_review">Your review</string>
+    <string name="post_review">Post Review</string>
+
+    <!-- Review Item / Details -->
+    <string name="user_profile">User profile</string>
+    <string name="review_image">Review Image</string>
+    <string name="back">Back</string>
 </resources>

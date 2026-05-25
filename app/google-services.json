@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "917684820544",
+    "project_id": "foodieshare-e8b58",
+    "storage_bucket": "foodieshare-e8b58.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917684820544:android:0bb4417a19391db242dda5",
+        "android_client_info": {
+          "package_name": "com.example.foodieshare"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "917684820544-4155487l2hduhfcnh83lcjafga4jpcg1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.foodieshare",
+            "certificate_hash": "ab466a9d3c8f043d56888cfb94f689bddb247081"
+          }
+        },
+        {
+          "client_id": "917684820544-a6bk12gv1tnlijk2ude7li5o500nk8ik.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMBSywoxWyENpTyddo3grc-0PhzMtTq5Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "917684820544-a6bk12gv1tnlijk2ude7li5o500nk8ik.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

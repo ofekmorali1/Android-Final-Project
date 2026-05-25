@@ -7,6 +7,15 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.foodieshare.R
 
+// Fragment showing list of reviews in RecyclerView
+// Each item shows:
+// - User profile image + name
+// - Restaurant name
+// - Rating (hearts)
+// - Description
+// - Review image
+// Clicking item opens ReviewDetailFragment
+// Uses ReviewViewModel.reviewsLiveData
 class FeedFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

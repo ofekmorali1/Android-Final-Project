@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.foodieshare.R
 
-class MyPostsFragment : Fragment() {
+class MyReviewsFragment : Fragment() {
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_my_posts, container, false)
+        return inflater.inflate(R.layout.fragment_my_reviews, container, false)
     }
 }

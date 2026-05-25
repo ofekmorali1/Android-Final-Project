@@ -3,7 +3,7 @@
     <style name="Theme.FoodieShare" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Primary brand color. -->
         <item name="colorPrimary">@color/primary</item>
-        <item name="colorOnPrimary">@color/text</item>
+        <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/primary</item>
         <item name="colorOnPrimaryContainer">@color/text_dark</item>
         <!-- Secondary brand color. -->
@@ -20,10 +20,18 @@
     </style>
 
     <style name="RoundedButton" parent="Widget.Material3.Button">
-        <item name="shapeAppearanceOverlay">@style/ShapeAppearance.FoodieShare.Button.Rounded</item>
+        <item name="shapeAppearanceOverlay">@style/ShapeAppearance_FoodieShare_Button_Rounded</item>
     </style>
 
-    <style name="ShapeAppearance.FoodieShare.Button.Rounded" parent="">
+    <style name="ShapeAppearance_FoodieShare_Button_Rounded" parent="">
         <item name="cornerSize">24dp</item>
     </style>
+
+    <!-- Style for rounded corners - specifically named to resolve the linking error -->
+    <style name="ShapeAppearanceOverlay.App.CornerSize12" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">12dp</item>
+    </style>
+
+    <style name="ShapeAppearance_Corner12" parent="ShapeAppearanceOverlay.App.CornerSize12" />
 </resources>

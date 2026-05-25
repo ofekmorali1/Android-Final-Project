@@ -1,7 +1,5 @@
 package com.example.foodieshare.data.repository
 
-import com.firebase.ui.auth.AuthUI
-import android.content.Intent
 import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
