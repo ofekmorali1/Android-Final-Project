@@ -1,47 +1,64 @@
 package com.example.foodieshare
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.foodieshare.ui.theme.FoodieShareTheme
+import android.util.Log
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import androidx.navigation.ui.NavigationUI
+import com.example.foodieshare.data.remote.PlacesClientProvider
 
-class MainActivity : ComponentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        setContent {
-            FoodieShareTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+
+        // Initialize PlacesClientProvider instead of just the SDK
+        PlacesClientProvider.init(applicationContext, getString(R.string.google_maps_key))
+        
+        setContentView(R.layout.activity_main)
+
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottomNav)
+
+        val navHostFragment = supportFragmentManager
+            .findFragmentById(R.id.navHostFragment) as NavHostFragment
+        val navController = navHostFragment.navController
+
+        // Setup bottom nav with NavController
+        bottomNav.setupWithNavController(navController)
+
+        bottomNav.setOnItemSelectedListener { item ->
+            Log.d("DEBUG", "Clicked on menu item: ${item.title}")
+
+            if (item.itemId == R.id.createReviewFragment) {
+                Log.d("DEBUG", "Navigating to Create Review...")
+            }
+
+            val navigated = NavigationUI.onNavDestinationSelected(item, navController)
+
+            if (!navigated) {
+                Log.e("DEBUG", "Navigation failed for item: ${item.title}")
+            }
+
+            return@setOnItemSelectedListener navigated
+        }
+
+        val authDestinations = setOf(
+            R.id.loginFragment,
+            R.id.registerFragment
+        )
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            bottomNav.visibility = if (destination.id in authDestinations) {
+                View.GONE
+            } else {
+                View.VISIBLE
             }
         }
-    }
-}
+        Log.d("DEBUG", "Activity started")
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    FoodieShareTheme {
-        Greeting("Android")
     }
 }
