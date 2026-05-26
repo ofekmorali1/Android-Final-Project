@@ -48,6 +48,7 @@ class ProfileFragment : Fragment() {
         setupRecyclerView()
         setupListeners()
         observeViewModel()
+        viewModel.loadMyReviews()
         
         toggleEditMode(false)
     }

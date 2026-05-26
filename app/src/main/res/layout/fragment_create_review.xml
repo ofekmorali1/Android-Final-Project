@@ -133,23 +133,47 @@
             tools:src="@tools:sample/backgrounds/scenic"
             tools:visibility="visible" />
 
-        <Button
-            android:id="@+id/btnSelectImage"
-            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/layoutImageButtons"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:orientation="horizontal"
             android:layout_marginTop="8dp"
-            android:text="Select Image"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/ivImagePreview" />
+            app:layout_constraintTop_toBottomOf="@id/ivImagePreview">
+
+            <Button
+                android:id="@+id/btnSelectImage"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="4dp"
+                android:text="Select Image" />
+
+            <Button
+                android:id="@+id/btnRemoveImage"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="4dp"
+                android:text="Remove Image"
+                android:textColor="#D32F2F"
+                app:strokeColor="#D32F2F"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </LinearLayout>
 
         <Button
             android:id="@+id/btnSubmit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:layout_marginBottom="24dp"
             android:text="Submit Review"
-            app:layout_constraintTop_toBottomOf="@id/btnSelectImage" />
+            app:layout_constraintTop_toBottomOf="@id/layoutImageButtons"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
         <ProgressBar
             android:id="@+id/progressBar"

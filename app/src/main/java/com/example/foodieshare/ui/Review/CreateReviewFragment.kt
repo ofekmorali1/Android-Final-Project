@@ -40,6 +40,8 @@ class CreateReviewFragment : Fragment() {
             selectedImageUri = it
             binding.ivImagePreview.visibility = View.VISIBLE
             binding.ivImagePreview.setImageURI(it)
+            binding.btnRemoveImage.visibility = View.VISIBLE
+            binding.btnSelectImage.text = "Change Image"
         }
     }
 
@@ -126,6 +128,14 @@ class CreateReviewFragment : Fragment() {
 
         binding.btnSubmit.setOnClickListener {
             validateAndSubmit()
+        }
+
+        binding.btnRemoveImage.setOnClickListener {
+            selectedImageUri = null
+            binding.ivImagePreview.setImageURI(null)
+            binding.ivImagePreview.visibility = View.GONE
+            binding.btnRemoveImage.visibility = View.GONE
+            binding.btnSelectImage.text = "Select Image"
         }
     }
 

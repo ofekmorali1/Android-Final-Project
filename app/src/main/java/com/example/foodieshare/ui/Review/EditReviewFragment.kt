@@ -25,6 +25,7 @@ import com.squareup.picasso.Picasso
 
 class EditReviewFragment : Fragment() {
 
+    private var isImageDeleted = false
     private var _binding: FragmentEditReviewBinding? = null
     private val binding get() = _binding!!
 
@@ -42,6 +43,9 @@ class EditReviewFragment : Fragment() {
         uri?.let {
             selectedImageUri = it
             binding.ivImagePreview.setImageURI(it)
+            binding.ivImagePreview.visibility = View.VISIBLE
+            binding.btnRemoveImage.visibility = View.VISIBLE
+            binding.btnSelectImage.text = "Change Image"
         }
     }
 
@@ -135,6 +139,15 @@ class EditReviewFragment : Fragment() {
         binding.btnSubmit.setOnClickListener {
             updateReview()
         }
+
+        binding.btnRemoveImage.setOnClickListener {
+            selectedImageUri = null
+            isImageDeleted = true
+            binding.ivImagePreview.setImageDrawable(null)
+            binding.ivImagePreview.visibility = View.GONE
+            binding.btnRemoveImage.visibility = View.GONE
+            binding.btnSelectImage.text = "Select Image"
+        }
     }
 
     private fun observeViewModel() {
@@ -190,9 +203,11 @@ class EditReviewFragment : Fragment() {
 
         if (review.imageUrl.isNullOrEmpty()) {
             binding.ivImagePreview.visibility = View.GONE
+            binding.btnRemoveImage.visibility = View.GONE
             binding.btnSelectImage.text = "Select Image"
         } else {
             binding.ivImagePreview.visibility = View.VISIBLE
+            binding.btnRemoveImage.visibility = View.VISIBLE
             binding.btnSelectImage.text = "Change Image"
             Picasso.get().load(review.imageUrl).into(binding.ivImagePreview)
         }
@@ -206,6 +221,7 @@ class EditReviewFragment : Fragment() {
         val address = binding.etAddress.text.toString()
         val rating = binding.ratingBar.rating
         val description = binding.etDescription.text.toString()
+        val imageUrlToSave = if (isImageDeleted) "" else originalReview?.imageUrl ?: ""
 
         if (city.isEmpty()) {
             binding.tilCity.error = "Required"
@@ -224,7 +240,8 @@ class EditReviewFragment : Fragment() {
             restaurantName = restaurantName,
             address = address,
             rating = rating,
-            description = description
+            description = description,
+            imageUrl = imageUrlToSave
         )
 
         updatedReview?.let {
@@ -240,7 +257,7 @@ class EditReviewFragment : Fragment() {
         val currentAddress = binding.etAddress.text.toString()
         val currentRating = binding.ratingBar.rating
         val currentDescription = binding.etDescription.text.toString()
-        val isImageChanged = selectedImageUri != null
+        val isImageChanged = selectedImageUri != null || isImageDeleted
 
         return currentCity != originalReview?.city ||
                 currentRestaurant != originalReview?.restaurantName ||

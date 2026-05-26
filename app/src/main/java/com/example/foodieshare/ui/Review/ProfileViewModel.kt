@@ -35,7 +35,7 @@ class ProfileViewModel(
 
     init {
         loadUserProfile()
-        loadMyReviews() // טעינה ראשונית כשנכנסים למסך
+        loadMyReviews()
     }
 
     private fun loadUserProfile() {
@@ -48,13 +48,11 @@ class ProfileViewModel(
         }
     }
 
-    // הפונקציה החדשה שמנקה את המסך ומושכת הכל מחדש
-    private fun loadMyReviews() {
+    fun loadMyReviews() {
         if (currentUserId.isEmpty()) return
         viewModelScope.launch {
-            _myReviewsLiveData.value = emptyList() // מנקה את המסך מיד!
+            _myReviewsLiveData.value = emptyList()
 
-            // שולף מחדש מהשרת
             val freshReviews = reviewRepository.fetchReviewsByUserId(currentUserId)
             _myReviewsLiveData.value = freshReviews
         }
@@ -81,13 +79,11 @@ class ProfileViewModel(
 
                 val result = usersRepository.saveUser(updatedUser)
                 if (result.isSuccess) {
-                    // מעדכן את כל הביקורות בפיירבייס
                     reviewRepository.updateAllUserReviews(currentUserId, newName, photoUrl)
 
                     _userLiveData.value = updatedUser
                     _updateSuccess.value = true
 
-                    // --- כאן הקסם! טוען את כל הביקורות מחדש אחרי השמירה ---
                     loadMyReviews()
                 }
             } catch (e: Exception) {
